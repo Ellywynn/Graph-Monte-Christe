@@ -3,3 +3,7 @@ obj
 test.csproj
 test.csproj.user
 203.png
+Graph.cs
+Graph.csproj
+Graph.csproj.user
+.gitignore
