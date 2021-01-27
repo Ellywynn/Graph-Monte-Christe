@@ -18,13 +18,46 @@ namespace Graph
 
 	public class Graph
 	{
+		#region Properties
 		private List<Edge> edges = new List<Edge>();
 		private List<char> nodes = new List<char>();
 		private List<List<int>> adjMatrix = new List<List<int>>();
+		private List<bool> visited = new List<bool>();
+		#endregion
 
-		public void RemoveEdge(char a, char b)
+		#region Functions
+		// Removes the edge from the edge list(char, char)
+		public void RemoveEdge(char u, char v)
 		{
+			// finding the edge with u, v nodes
+			for (int i = 0; i < edges.Count; i++)
+			{
+				// if this edge has been found
+				if ((edges[i].u == u && edges[i].v == v) ||
+					(edges[i].u == v && edges[i].v == u))
+				{
+					// remove it from the list
+					edges.RemoveAt(i);
 
+					// remove connection from adjustment matrix
+					int i1 = nodes.IndexOf(u);
+					int i2 = nodes.IndexOf(v);
+
+					adjMatrix[i1][i2] = 0;
+					adjMatrix[i2][i1] = 0;
+
+					debug($"Edge ({u}; {v}) has been removed.");
+
+					return;
+				}
+			}
+			debug($"There is no edge ({u}; {v}).");
+		}
+
+		// Removes the edge from the edge list(Edge)
+		public void RemoveEdge(Edge edge)
+		{
+			RemoveEdge(edge.u, edge.v);
 		}
 
 		// Addes new edge to the edge list
@@ -54,13 +87,14 @@ namespace Graph
 				count++;
 			}
 
-			// expland adjustment matrix if new nodes have been added
-			ExpandMatrix(count);
+			// explands adjustment matrix if new nodes have been added
+			expandMatrix(count);
 
-			// find indexes of the new added nodes 
+			// finds indexes of the new added nodes 
 			int i1 = nodes.IndexOf(edge.u);
 			int i2 = nodes.IndexOf(edge.v);
 
+			// adds connection between nodes in the adjustment matrix
 			if ((i1 != -1) && (i2 != -1))
 			{
 				adjMatrix[i1][i2] = 1;
@@ -77,12 +111,12 @@ namespace Graph
 			}
 			else
 			{
-				Console.WriteLine("Graph:\n");
+				Console.WriteLine("-------Graph:-------");
 				foreach (var e in edges)
 				{
 					Console.Write($"{e.u} -> {e.v} = {e.w}\n");
 				}
-				Console.WriteLine();
+				Console.WriteLine("--------------------");
 			}
 		}
 
@@ -97,7 +131,7 @@ namespace Graph
 			{
 				Console.WriteLine("Adjustment matrix:");
 
-				Console.Write("  ");
+				Console.Write("# ");
 
 				foreach (var n in nodes)
 				{
@@ -115,10 +149,66 @@ namespace Graph
 					}
 					Console.WriteLine();
 				}
+				Console.WriteLine("--------------------");
 			}
 		}
 
-		private void ExpandMatrix(int count)
+		// Displays all graph nodes
+		public void DisplayNodes()
+		{
+			Console.Write($"Nodes({nodes.Count}): ");
+			foreach(var n in nodes)
+			{
+				Console.Write($"{n} ");
+			}
+			Console.WriteLine();
+		}
+
+		// Depth-First Search algorithm
+		public void DFS(char start = 'A')
+		{
+			// if there is no such node, say about it
+			if (nodes.IndexOf(start) == -1)
+			{
+				Console.WriteLine($"[DFS]: There is no \'{start}\' node.");
+			}
+			else
+			{
+				// initializing visited nodes
+				visited = new List<bool>(nodes.Count);
+
+				// set every visited node to false
+				for (int i = 0; i < nodes.Count; i++)
+					visited.Add(false);
+
+				Console.Write("[DFS]: ");
+
+				// start DFS algorithm
+				dfs(nodes.IndexOf(start));
+
+				Console.WriteLine();
+			}
+		}
+
+		// Deletes all unconnected nodes
+		public void DeleteUnconnectedNodes()
+		{
+			for(int i = 0; i < nodes.Count; i++)
+			{
+				checkForNodeDelete(nodes[i]);
+			}
+		}
+		#endregion
+
+		#region Private Functions
+		// Debug information
+		private void debug(string msg)
+		{
+			Console.WriteLine("[DEBUG]: " + msg);
+		}
+
+		// Expand matrix if new nodes have been added to the graph
+		private void expandMatrix(int count)
 		{
 			// for each node that we added
 			for (int c = 0; c < count; c++)
@@ -139,6 +229,54 @@ namespace Graph
 				}
 			}
 		}
+
+		// Implements DFS
+		private void dfs(int at)
+		{
+			// if we have visited this node already, skip it
+			if (visited[at])
+				return;
+
+			// print current node
+			Console.Write($"{nodes[at]} ");
+
+			// set this node to visited
+			visited[at] = true;
+
+			// find neighbours of this node
+			for (int i = 0; i < adjMatrix.Count; i++)
+			{
+				// if there is connection between nodes
+				if (adjMatrix[at][i] == 1)
+				{
+					// do DFS for each neighbour
+					dfs(i);
+				}
+			}
+		}
+
+		// Checks if there is no node connection between other nodes
+		// And if it is, deletes this node
+		private void checkForNodeDelete(char node)
+		{
+			bool delete = true;
+			for (int j = 0; j < adjMatrix.Count; j++)
+			{
+				if (adjMatrix[nodes.IndexOf(node)][j] == 1)
+				{
+					delete = false;
+				}
+			}
+
+			if (delete)
+			{
+				debug($"Deleting \'{node}\' node..");
+				Console.WriteLine($"ADJ: {nodes.IndexOf(node)}");
+				adjMatrix.RemoveAt(nodes.IndexOf(node));
+				nodes.Remove(node);
+			}
+		}
+		#endregion
 	}
 
 	class MainClass
@@ -147,9 +285,44 @@ namespace Graph
 		{
 			Graph graph = new Graph();
 
+			graph.AddEdge('A', 'B', 27);
+			graph.AddEdge('A', 'M', 15);
+			graph.AddEdge('B', 'G', 9);
+			graph.AddEdge('B', 'L', 7);
+			graph.AddEdge('L', 'N', 10);
+			graph.AddEdge('N', 'G', 8);
+			graph.AddEdge('N', 'R', 31);
+			graph.AddEdge('R', 'D', 32);
+			graph.AddEdge('G', 'S', 11);
+			graph.AddEdge('S', 'M', 15);
+			graph.AddEdge('M', 'D', 21);
+			graph.AddEdge('S', 'D', 17);
+
 			graph.Display();
+			graph.DisplayNodes();
 			graph.DisplayMatrix();
 
+			graph.DFS();
+			graph.DFS('C');
+			graph.DFS('L');
+
+			Console.WriteLine("----------------------");
+
+			graph.RemoveEdge('L', 'B');
+			graph.RemoveEdge('N', 'L');
+			graph.RemoveEdge('Z', 'X');
+
+			graph.DisplayNodes();
+
+			Console.WriteLine("----------------------");
+
+			graph.DisplayMatrix();
+
+			graph.DFS();
+
+			Console.WriteLine("----------------------");
+
+			Console.WriteLine("Press any key to exit program.");
 			Console.ReadKey();
 		}
 	}
