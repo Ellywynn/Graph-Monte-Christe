@@ -190,6 +190,20 @@ namespace Graph
 			}
 		}
 
+		// Breadth-First Search algorithm
+		public void BFS(char start = 'A')
+		{
+			// if there is no such node, say about it
+			if (nodes.IndexOf(start) == -1)
+			{
+				Console.WriteLine($"[DFS]: There is no \'{start}\' node.");
+			}
+			else
+			{
+				
+			}
+		}
+
 		// Deletes all unconnected nodes
 		public void DeleteUnconnectedNodes()
 		{
@@ -255,6 +269,11 @@ namespace Graph
 			}
 		}
 
+		private void bfs()
+		{
+
+		}
+
 		// Checks if there is no node connection between other nodes
 		// And if it is, deletes this node
 		private void checkForNodeDelete(char node)
@@ -311,8 +330,6 @@ namespace Graph
 			graph.RemoveEdge('L', 'B');
 			graph.RemoveEdge('N', 'L');
 			graph.RemoveEdge('Z', 'X');
-
-			graph.DisplayNodes();
 
 			Console.WriteLine("----------------------");
 
