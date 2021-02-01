@@ -1,2 +1,2 @@
 # Graph Monte Christe
- C# graph implementation
+ C# graph and its algorithms implementation
