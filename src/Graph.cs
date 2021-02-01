@@ -18,7 +18,7 @@ namespace Graph
 
 	public class Graph
 	{
-		#region Properties
+		#region Fields
 		private List<Edge> edges = new List<Edge>();
 		private List<char> nodes = new List<char>();
 		private List<List<int>> adjMatrix = new List<List<int>>();
@@ -116,7 +116,11 @@ namespace Graph
 				{
 					Console.Write($"{e.u} -> {e.v} = {e.w}\n");
 				}
-				Console.WriteLine("--------------------");
+
+				Console.WriteLine();
+				DisplayNodes();
+				Console.WriteLine();
+				DisplayMatrix();
 			}
 		}
 
@@ -181,7 +185,7 @@ namespace Graph
 				for (int i = 0; i < nodes.Count; i++)
 					visited.Add(false);
 
-				Console.Write("[DFS]: ");
+				Console.Write($"[DFS({start})]: ");
 
 				// start DFS algorithm
 				dfs(nodes.IndexOf(start));
@@ -196,11 +200,56 @@ namespace Graph
 			// if there is no such node, say about it
 			if (nodes.IndexOf(start) == -1)
 			{
-				Console.WriteLine($"[DFS]: There is no \'{start}\' node.");
+				Console.WriteLine($"[BFS]: There is no \'{start}\' node.");
 			}
 			else
 			{
-				
+				// initializing visited nodes
+				visited = new List<bool>(nodes.Count);
+
+				// set every visited node to false
+				for (int i = 0; i < nodes.Count; i++)
+					visited.Add(false);
+
+				// queue for processed nodes
+				Queue<char> q = new Queue<char>();
+
+				// add start to the queue
+				q.Enqueue(start);
+				// set start node to visited
+				visited[nodes.IndexOf(start)] = true;
+
+				Console.Write($"[BFS({start})]: ");
+
+				// while queue is not empty
+				while (q.Count != 0)
+				{
+					// get fist node from queue
+					char node = q.Dequeue();
+					// display this node to the console
+					Console.Write($"{node} ");
+
+					// get index of this node
+					int index = nodes.IndexOf(node);
+
+					// for each neightbour of this node
+					for(int i = 0; i < adjMatrix.Count; i++)
+					{
+						// find neightbour
+						if(adjMatrix[index][i] == 1)
+						{
+							// if neighbour is not visited
+							if (!visited[i])
+							{
+								// add it to the queue and set to visited
+								q.Enqueue(nodes[i]);
+								visited[i] = true;
+							}
+						}
+					}
+				}
+
+				Console.WriteLine();
 			}
 		}
 
@@ -244,7 +293,7 @@ namespace Graph
 			}
 		}
 
-		// Implements DFS
+		// Implements DFS(recursively)
 		private void dfs(int at)
 		{
 			// if we have visited this node already, skip it
@@ -267,11 +316,6 @@ namespace Graph
 					dfs(i);
 				}
 			}
-		}
-
-		private void bfs()
-		{
-
 		}
 
 		// Checks if there is no node connection between other nodes
@@ -318,12 +362,11 @@ namespace Graph
 			graph.AddEdge('S', 'D', 17);
 
 			graph.Display();
-			graph.DisplayNodes();
-			graph.DisplayMatrix();
-
+			
 			graph.DFS();
+			graph.BFS();
 			graph.DFS('C');
-			graph.DFS('L');
+			graph.BFS('C');
 
 			Console.WriteLine("----------------------");
 
@@ -332,10 +375,10 @@ namespace Graph
 			graph.RemoveEdge('Z', 'X');
 
 			Console.WriteLine("----------------------");
-
+			Console.WriteLine("After removing edges:\n");
 			graph.DisplayMatrix();
-
 			graph.DFS();
+			graph.BFS();
 
 			Console.WriteLine("----------------------");
 
@@ -359,8 +402,9 @@ G -> S = 11
 S -> M = 15
 M -> D = 21
 S -> D = 17
---------------------
+
 Nodes(9): A B M G L N R D S
+
 Adjustment matrix:
 # A B M G L N R D S
 A 0 1 1 0 0 0 0 0 0
@@ -373,15 +417,17 @@ R 0 0 0 0 0 1 0 1 0
 D 0 0 1 0 0 0 1 0 1
 S 0 0 1 1 0 0 0 1 0
 --------------------
-[DFS]: A B G N L R D M S
+[DFS(A)]: A B G N L R D M S
+[BFS(A)]: A B M G L D S N R
 [DFS]: There is no 'C' node.
-[DFS]: L B A M D R N G S
+[BFS]: There is no 'C' node.
 ----------------------
 [DEBUG]: Edge (L; B) has been removed.
 [DEBUG]: Edge (N; L) has been removed.
 [DEBUG]: There is no edge (Z; X).
-Nodes(9): A B M G L N R D S
 ----------------------
+After removing edges:
+
 Adjustment matrix:
 # A B M G L N R D S
 A 0 1 1 0 0 0 0 0 0
@@ -394,7 +440,8 @@ R 0 0 0 0 0 1 0 1 0
 D 0 0 1 0 0 0 1 0 1
 S 0 0 1 1 0 0 0 1 0
 --------------------
-[DFS]: A B G N R D M S
+[DFS(A)]: A B G N R D M S
+[BFS(A)]: A B M G D S N R
 ----------------------
 Press any key to exit program. 
 */
